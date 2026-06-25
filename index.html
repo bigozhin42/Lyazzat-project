@@ -431,7 +431,9 @@ function renderEmployee(eid) {
       <td><span class="badge ${task.type==='important'?'badge-purple':'badge-blue'}">${TYPE_L[task.type]}</span></td>
       <td><span class="badge ${STATUS_B[task.status]}">${STATUS_L[task.status]}</span></td>
       <td>${fmtDate(task.start)}</td>
-      <td>${tc>0?`<span class="strike">${fmtDate(orig)}</span>`:fmtDate(orig)}</td>
+      <td>${tc>0
+        ? task.deadlines.slice(0,-1).map((d,i)=>`<span class="strike" style="display:block;font-size:11px;color:var(--text-secondary)">${i===0?'':'↓ '}${fmtDate(d)}</span>`).join('')
+        : fmtDate(orig)}</td>
       <td><span class="tc ${tcCls(tc)}">${tc}</span></td>
       <td>${tc>0?`<span class="date-red">${fmtDate(curr)}</span>`:fmtDate(curr)}</td>
       <td>${days(task.start,curr)}</td>
