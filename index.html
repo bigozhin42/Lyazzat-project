@@ -145,6 +145,7 @@ tbody tr:hover { background: var(--bg); }
 .cl-item input[type="checkbox"] { width: 16px; height: 16px; cursor: pointer; flex-shrink: 0; accent-color: var(--primary); }
 .cl-text { flex: 1; font-size: 13.5px; }
 .cl-item.done .cl-text { text-decoration: line-through; color: var(--text-secondary); }
+.cl-text[contenteditable]:focus { outline: none; border-bottom: 1.5px solid var(--primary); }
 .cl-tag { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 3px; flex-shrink: 0; }
 .cl-tag-transfer { background: #fef3c7; color: #92400e; border-left: 3px solid #f59e0b; }
 .cl-tag-planned { background: #dbeafe; color: #1e40af; border-left: 3px solid #3b82f6; }
@@ -506,7 +507,7 @@ function renderChecklist() {
     else if(!item.dueDate&&item.createdDate<clDate) tag=`<span class="cl-tag cl-tag-transfer">перенос</span>`;
     return `<div class="cl-item${item.done?' done':''}">
       <input type="checkbox" ${item.done?'checked':''} onchange="toggleCl('${item.id}')">
-      <span class="cl-text">${item.text}</span>${tag}
+      <span class="cl-text" contenteditable="true" onblur="saveCl('${item.id}',this)" onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur()}">${item.text}</span>${tag}
       <button class="btn btn-ghost btn-icon btn-sm" onclick="deleteCl('${item.id}')" title="Удалить" style="padding:3px 6px;font-size:16px;line-height:1">×</button>
     </div>`;
   };
@@ -523,6 +524,12 @@ function addClItem() {
   const due=document.getElementById('cl-due').value;
   db.checklist.push({id:uid(),text,done:false,createdDate:clDate,dueDate:due!==clDate?due:null});
   save(); document.getElementById('cl-input').value=''; document.getElementById('cl-due').value=clDate; renderChecklist();
+}
+function saveCl(id, el) {
+  const text = el.textContent.trim();
+  if (!text) { el.textContent = db.checklist.find(x=>x.id===id)?.text || ''; return; }
+  const item = db.checklist.find(x=>x.id===id);
+  if (item) { item.text = text; save(); }
 }
 function toggleCl(id) {
   const i=db.checklist.find(x=>x.id===id); if(!i)return;
